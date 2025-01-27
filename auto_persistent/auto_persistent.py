@@ -5,6 +5,28 @@ import re
 import subprocess
 import yaml
 
+# 変更を検知する演算子
+modifying_operators = [
+    r"=",
+    r"\+=",
+    r"-=",
+    r"\*=",
+    r"/=",
+    r"//=",
+    r"%=",
+    r"\*\*=",
+    r"&=",
+    r"\|=",
+    r"\^=",
+    r">>=",
+    r"<<="
+]
+
+# 変更を検知するメソッド
+modifying_methods = [
+    "append", "extend", "remove", "pop", "clear", "update", "insert", "setdefault", "discard", "add"
+]
+
 def edit_and_save_python_file(file_path):
     # 絶対パスに変換
     abs_file_path = os.path.abspath(file_path)
@@ -21,6 +43,11 @@ def edit_and_save_python_file(file_path):
 
         # 編集結果を保存するリスト
         updated_lines = []
+        
+        variable_name_list = []
+        
+        # 使用されている変数を保存するリスト
+        used_name_list = []
 
         # 状態追跡
         inside_function = False
@@ -39,16 +66,49 @@ def edit_and_save_python_file(file_path):
                 match = re.match(r"^(\w+)\s*=\s*(.+)", stripped_line)
                 if match:
                     variable_name, value = match.groups()
+                    
+                    variable_name_list.append(variable_name)  # 変数名を追加
                     # 置き換えた形式を追加
-                    updated_lines.append(f"p.{variable_name} = {value}\n")
+                    # updated_lines.append(f"p.{variable_name} = {value}\n")
                     continue
+            else:
+                for search_name in variable_name_list:
+                    if search_name in stripped_line:
+                        # print(f"変数名 {search_name} が関数内で使用されています。")
+                        # print(stripped_line)
+                        # pattern = r'\b([a-zA-Z_][a-zA-Z0-9_]*)\s*(?:\.\w+\(|\+=|-=|\*=|/=)'
+                        # matches = re.findall(pattern, search_name)
+                        # print(matches)  # {'names'}
+                        if is_variable_modified(search_name, stripped_line):
+                            # print(f"変数 '{search_name}' は変更されています: {stripped_line}")
+                            if not search_name in used_name_list:
+                                used_name_list.append(search_name)
+                            
+                
 
             # 元の行を保持
-            updated_lines.append(line)
+            # updated_lines.append(line)
 
             # 関数の終了を検出（簡易チェック）
             if inside_function and stripped_line == "":
                 inside_function = False
+        
+        print(used_name_list)
+        
+        for line in lines:
+            stripped_line = line
+            
+            for search_name in used_name_list:
+                    if search_name in stripped_line:
+                        modified_line = re.sub(fr'\b{search_name}\b', f'p.{search_name}', stripped_line)
+                        updated_lines.append(modified_line)
+                        continue
+                    else:
+                        # 元の行を保持
+                        updated_lines.append(line)
+                        continue
+            
+        print(modified_line)
         
         # 1行目に "import persistentvals" を追加
         updated_lines.insert(0, "import persistentvals\n")
@@ -70,6 +130,23 @@ def edit_and_save_python_file(file_path):
         print(f"1行目に 'import persistentvals' を追加し、'{new_file_path}' に保存しました。")
     except Exception as e:
         print(f"エラーが発生しました: {e}")
+        
+        
+def is_variable_modified(variable, line):
+    """
+    指定された行において、変数が変更されているかを判定する
+    """
+    # 代入演算子を含む場合
+    for op in modifying_operators:
+        if re.search(fr"\b{variable}\b\s*{op}", line):
+            return True
+
+    # メソッド呼び出しを含む場合
+    for method in modifying_methods:
+        if re.search(fr"\b{variable}\b\s*\.\s*{method}\s*\(", line):
+            return True
+
+    return False
 
 def copy_auto_persistent(script_dir, file_dir, build_dir):
     # persistentvals.py を build フォルダにコピー
@@ -145,7 +222,7 @@ if __name__ == "__main__":
         res_name = sys.argv[4]
         try:
             print("ビルド開始")
-            cmd = subprocess.run(['docker', 'build', '-t', image_name, 'build/.'], encoding='utf-8', stdout=subprocess.PIPE, check=True)
+            cmd = subprocess.run(['docker', 'build', '-t', image_name, './build/.'], encoding='utf-8', stdout=subprocess.PIPE, check=True)
             print("push開始")
             cmd = subprocess.run(['docker', 'push', image_name], encoding='utf-8', stdout=subprocess.PIPE, check=True)
             
