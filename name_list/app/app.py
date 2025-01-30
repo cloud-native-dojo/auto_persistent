@@ -1,34 +1,9 @@
-from flask import Flask, request, render_template_string, redirect, url_for
+from flask import Flask, request, render_template, redirect, url_for
 
 app = Flask(__name__)
 
 # 名前を保存するリスト
 names = []
-
-# HTML テンプレートを文字列として定義
-HTML_TEMPLATE = """
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <title>名前リスト</title>
-</head>
-<body>
-    <h1>名前リスト</h1>
-    <form method="post">
-        <label for="name">名前を入力してください:</label>
-        <input type="text" id="name" name="name" required>
-        <button type="submit">追加</button>
-    </form>
-    <h2>リストの内容:</h2>
-    <ul>
-        {% for name in names %}
-            <li>{{ name }}</li>
-        {% endfor %}
-    </ul>
-</body>
-</html>
-"""
 
 @app.route("/", methods=["GET", "POST"])
 def index():
@@ -38,7 +13,12 @@ def index():
         if name:
             names.append(name)
         return redirect(url_for("index"))
-    return render_template_string(HTML_TEMPLATE, names=names)
+    return render_template("index.html", names=names)
+
+@app.route("/running", methods=["GET", "POST"])
+def running():
+    return render_template("running.html")
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
+

@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>running</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/running.css') }}">
+</head>
+<body>
+    <div class="image-container">
+        <img src="{{ url_for('static', filename='img/folder.png') }}" alt="フォルダ">
+    </div>
+    <div class="progress-container">
+        <h1>〇〇中＜N/4＞</h1>
+        <progress id="downloadProgress" value="0" max="100"></progress>
+    </div>
+    <script type="text/javascript" src="{{ url_for('static', filename='javascript/running.js') }}"></script>
+</body>
+</html>
+
