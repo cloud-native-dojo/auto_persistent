@@ -112,12 +112,13 @@ def edit_and_save_python_file(file_path):
         
         # 1行目に "import persistentvals" を追加
         updated_lines.insert(0, "import persistentvals\n")
-        updated_lines.insert(1, "p = persistentvals.PersistentVals('./test.dat')\n")
+        updated_lines.insert(1, "p = persistentvals.PersistentVals('./data/value.dat')\n")
 
         # 保存先ディレクトリを設定
         build_dir = "build"
         shutil.rmtree(build_dir)
-        os.makedirs(build_dir)  # buildフォルダを作成（既に存在している場合はスキップ）
+        os.makedirs(build_dir)
+        os.makedirs(f'b{build_dir}/data')  # buildフォルダを作成（既に存在している場合はスキップ）
 
         # 元のファイル名を取得し、buildフォルダ内に保存
         file_name = os.path.basename(abs_file_path)
@@ -244,5 +245,6 @@ if __name__ == "__main__":
         res_name = sys.argv[2]
         print(f"{res_name}を削除します")
         subprocess.run(['kubectl', 'delete', 'deploy', res_name], encoding='utf-8', stdout=subprocess.PIPE)
-        subprocess.run(['kubectl', 'delete', 'service', res_name], encoding='utf-8', stdout=subprocess.PIPE)
+        #subprocess.run(['kubectl', 'delete', 'service', res_name], encoding='utf-8', stdout=subprocess.PIPE)
+        subprocess.run(['kubectl', 'delete', 'pvc', f'{res_name}-pvc'], encoding='utf-8', stdout=subprocess.PIPE)
 

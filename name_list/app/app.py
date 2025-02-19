@@ -2,7 +2,7 @@ from flask import Flask, request, render_template_string, redirect, url_for
 
 app = Flask(__name__)
 
-# 名前を保存するリスト
+#PVC
 names = []
 
 # HTML テンプレートを文字列として定義
@@ -22,7 +22,7 @@ HTML_TEMPLATE = """
     </form>
     <h2>リストの内容:</h2>
     <ul>
-        {% for name in names %}
+        {% for name in name_data %}
             <li>{{ name }}</li>
         {% endfor %}
     </ul>
@@ -38,7 +38,7 @@ def index():
         if name:
             names.append(name)
         return redirect(url_for("index"))
-    return render_template_string(HTML_TEMPLATE, names=names)
+    return render_template_string(HTML_TEMPLATE, name_data=names)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
