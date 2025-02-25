@@ -1,3 +1,6 @@
+#実行コマンドメモ
+#python3 auto_persistent.py build ../name_list/app/app.py tasyuminahito/persistented:v1 name-list
+
 import sys
 import os
 import shutil
@@ -118,7 +121,7 @@ def edit_and_save_python_file(file_path):
         build_dir = "build"
         shutil.rmtree(build_dir)
         os.makedirs(build_dir)
-        os.makedirs(f'b{build_dir}/data')  # buildフォルダを作成（既に存在している場合はスキップ）
+        os.makedirs(f'{build_dir}/data')  # buildフォルダを作成（既に存在している場合はスキップ）
 
         # 元のファイル名を取得し、buildフォルダ内に保存
         file_name = os.path.basename(abs_file_path)
