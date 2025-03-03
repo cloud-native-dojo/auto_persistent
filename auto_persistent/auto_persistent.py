@@ -6,7 +6,6 @@ import os
 import shutil
 import re
 import subprocess
-import yaml
 
 # 変更を検知する演算子
 modifying_operators = [
