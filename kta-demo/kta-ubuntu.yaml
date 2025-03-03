@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ubuntu
+  namespace: kta-demo
+  labels:
+    app: ubuntu
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ubuntu
+  template:
+    metadata:
+      labels:
+        app: ubuntu
+    spec:
+      containers:
+        - name: ubuntu
+          image: tasyuminahito/my-ubuntu-sshd  # カスタムイメージを使用
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 22  # SSH用
+            - containerPort: 5003 # Flaskアプリ
+            - containerPort: 5004 # Flaskアプリ
+      imagePullSecrets:
+        - name: regcred
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ubuntu-ssh
+  namespace: kta-demo
+spec:
+  selector:
+    app: ubuntu
+  ports:
+    - name: ssh
+      protocol: TCP
+      port: 22
+      targetPort: 22
+  type: LoadBalancer
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: flask-app
+  namespace: kta-demo
+spec:
+  selector:
+    app: ubuntu
+  ports:
+    - name: flask-5003
+      protocol: TCP
+      port: 5003
+      targetPort: 5003
+    - name: flask-5004
+      protocol: TCP
+      port: 5004
+      targetPort: 5004
+  type: LoadBalancer
